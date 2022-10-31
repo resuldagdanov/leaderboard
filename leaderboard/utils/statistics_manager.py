@@ -13,7 +13,6 @@ from __future__ import print_function
 
 from dictor import dictor
 import math
-import os
 
 from srunner.scenariomanager.traffic_events import TrafficEventType
 
@@ -202,8 +201,6 @@ class StatisticsManager(object):
 
     def clear_records(self):
         """Cleanes up the file"""
-        if not os.path.exists(self._endpoint):
-            return
         if not self._endpoint.startswith(('http:', 'https:', 'ftp:')):
             with open(self._endpoint, 'w') as fd:
                 fd.truncate(0)
