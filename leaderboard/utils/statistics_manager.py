@@ -13,6 +13,7 @@ from __future__ import print_function
 
 from dictor import dictor
 import math
+import os
 
 from srunner.scenariomanager.traffic_events import TrafficEventType
 
@@ -37,9 +38,9 @@ PENALTY_PERC_DICT = {
 }
 
 PENALTY_NAME_DICT = {
-    TrafficEventType.COLLISION_STATIC: 'collisions_pedestrian',
-    TrafficEventType.COLLISION_PEDESTRIAN: 'collisions_vehicle',
-    TrafficEventType.COLLISION_VEHICLE: 'collisions_layout',
+    TrafficEventType.COLLISION_STATIC: 'collisions_layout',
+    TrafficEventType.COLLISION_PEDESTRIAN: 'collisions_pedestrian',
+    TrafficEventType.COLLISION_VEHICLE: 'collisions_vehicle',
     TrafficEventType.TRAFFIC_LIGHT_INFRACTION: 'red_light',
     TrafficEventType.STOP_INFRACTION: 'stop_infraction',
     TrafficEventType.OUTSIDE_ROUTE_LANES_INFRACTION: 'outside_route_lanes',
@@ -201,6 +202,8 @@ class StatisticsManager(object):
 
     def clear_records(self):
         """Cleanes up the file"""
+        if not os.path.exists(self._endpoint):
+            return
         if not self._endpoint.startswith(('http:', 'https:', 'ftp:')):
             with open(self._endpoint, 'w') as fd:
                 fd.truncate(0)
@@ -475,7 +478,6 @@ class StatisticsManager(object):
             str(global_record.scores_mean['score_composed']),
             str(global_record.scores_mean['score_route']),
             str(global_record.scores_mean['score_penalty']),
-            str(global_record.scores_mean['score_penalty']),
             str(global_record.infractions[PENALTY_NAME_DICT[TrafficEventType.COLLISION_PEDESTRIAN]]),
             str(global_record.infractions[PENALTY_NAME_DICT[TrafficEventType.COLLISION_VEHICLE]]),
             str(global_record.infractions[PENALTY_NAME_DICT[TrafficEventType.COLLISION_STATIC]]),
@@ -560,4 +562,11 @@ class StatisticsManager(object):
 
             self.save_entry_status('Invalid')
 
+        self.write_statistics()
+
+    def write_statistics(self):
+        """
+        Saves the statistics into the endpoint. Used to save results mid simulation,
+        for the final results, use 'instead of 'validate_and_write_statistics' instead.
+        """
         save_dict(self._endpoint, self._results.to_json())
